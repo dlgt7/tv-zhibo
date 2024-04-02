@@ -1,46 +1,29 @@
-name: itvlist
+name: Merge upstream release→release
 
 on:
-  schedule:
-    - cron: '0 9,21 * * *'
+  # 推送代码后触发
   push:
-    branches:
-      - main
+  # 定时任务触发，使用 cron 规则，这里默认一小时执行一次      '0 * * * *'    '0 */6 * * *'  12小时
+
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
-  build:
+  merge:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-    
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.x
-
-      - name: Install dependencies
-        run: pip install selenium requests futures eventlet
-
-      - name: Run itv_all
-        run: python ${{ github.workspace }}/itv_all.py
-
-      #- name: Run cctv
-        #run: python ${{ github.workspace }}/cctv.py
-        
-      #- name: Run weishi
-        #run: python ${{ github.workspace }}/weishi.py
-        
-      #- name: Run qita
-        #run: python ${{ github.workspace }}/qita.py
-        
-      - name: 提交更改
+      - uses: actions/checkout@v3
+      - name: Merge upstream
         run: |
-          git config --local user.email "ssili@126.com"
-          git config --local user.name "ssili126"
-          git add .
-          git commit *.txt -m "Add generated file"
-          git commit *.m3u -m "Add generated file"
-          #git pull --rebase
-          git push -f
+          # 使用自己的用户名替换 username
+          git config --global user.name 'dlgt7'
+          git config --global user.email '120@qq.com'
+          git pull --unshallow
+          # 自行替换要同步的上游仓库地址
+          git remote add upstream https://github.com/ssili126/tv.git
+          git fetch upstream
+          git checkout main
+          git merge upstream/main
+          git pull origin main
+          git push origin main
